@@ -11,7 +11,7 @@
 #define SWITCHES_INVALID 0xFF
 #define EXIT_ERROR -1
 
-// Print button values in binary
+// Print switch values in binary
 void print_switches(uint8_t switches, bool int_pending_before_ack,
                     bool int_pending_after_ack) {}
 
@@ -19,23 +19,31 @@ void print_switches(uint8_t switches, bool int_pending_before_ack,
 int main() {
   printf("-------------------------------------------------------\n");
   printf("Welcome to the switches test.\n");
-  printf("When you flip a switch the new switch values should be "
-         "printed in binary.\n\n");
-  printf("After each switch flip, the program will check if an "
-         "interrupt is pending,\nthen acknowledge the interrupt, then verify "
-         "that the interrupt is no longer pending.\n\n");
+  printf("When you flip a switch the new switch values should be printed in "
+         "binary.\n\n");
+  printf("After each switch flip, the program will check if an interrupt is "
+         "pending,\nthen acknowledge the interrupt, then verify that the "
+         "interrupt is no longer pending.\n\n");
   printf("When correctly implemented, the program should print something like "
          "the following\nafter each switch flip:\n\n");
   printf(
       "Switches: 0001  Int pending: 1 -- Ack Interrupt -- Int pending: 0\n\n");
   printf("The switches driver does not handle debouncing; you may "
-         "see extra messages when the switches bounce.\n");
+         "see extra messages when the switches bounce.\n\n");
+  printf("If you only see the ERROR on rare occasions, your driver is likely "
+         "fine.  A switch\ncan bounce in the brief window between the ack and "
+         "the second pending check,\nwhich re-triggers the interrupt.  If the "
+         "ERROR appears on every flip, there is\na bug in your driver.\n\n");
+  printf("If the power jumper is loose, moving the switches may power cycle "
+         "the board.\nIf you notice that happen, throw that jumper out and "
+         "get a new one from the\ndrawer on the right at the back of the "
+         "room.\n");
   printf("-------------------------------------------------------\n");
 
   // Initialize switches and check for error
   int32_t err = switches_init(SYSTEM_SWITCHES_UIO_FILE);
   if (err) {
-    printf("butons_init failed\n");
+    printf("switches_init failed\n");
     exit(EXIT_ERROR);
   }
 
@@ -46,7 +54,7 @@ int main() {
   for (;; switches_old = switches) {
     switches = switches_read() & SWITCHES_ALL_MASK;
 
-    // Print only if button value has changed
+    // Print only if switch value has changed
     if (switches != switches_old) {
 
       printf("Switches: ");
